@@ -116,6 +116,10 @@ dist
 # DynamoDB Local files
 .dynamodb/
 
+# misc
+.DS_Store
+*.pem
+
 # TernJS port file
 .tern-port
 
