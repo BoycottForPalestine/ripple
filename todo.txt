@@ -1,0 +1,35 @@
+- Set up API endpoint to get all current cron jobs running
+- Set up API endpoint to edit cron job cadence
+- Create alert data model
+
+-----------
+
+- Condition Match
+- Grouping Match
+
+{
+  _id: "whatever",
+  label: "Terry Stops Alert"
+  alertType: "conditionMatch"
+  thresholdCount: 3,
+  timeWindow: 3600 (in ms),
+  measurementCadence: (in ms),
+  eventSourceName: (link to sourceName),
+  matchConditions: {
+    [customField]: "N",
+  }
+}
+
+{
+  _id: "whatever",
+  label: "Terry Stops Alert"
+  alertType: "groupingMatch"
+  thresholdCount: 3,
+  timeWindow: 3600 (in ms),
+  measurementCadence: (in ms),
+  eventSourceName: (link to sourceName),
+  matchConditions: {
+    [arrest_type]: "N",
+  },
+  groupingMatchField: 'as_on_squad_desc'
+}
