@@ -10,7 +10,7 @@ import {
   RippleEvent,
   getEventsByFilterAndTimeWindow,
 } from "../../model/events";
-import FlareService from "../flare-service";
+import LighthouseService from "../lighthouse-service";
 
 type AlertCronJob = {
   alertFn: () => void;
@@ -28,7 +28,7 @@ function generateAlertFunction(alert: Omit<Alert, "_id">) {
         alert.timeWindow
       );
       if (events.length >= alert.thresholdCount) {
-        FlareService.dispatchEmails(
+        LighthouseService.dispatchEmails(
           ["shikev@umich.edu"],
           `Alert with name ${alert.label} triggered!`
         );
@@ -70,7 +70,7 @@ function generateAlertFunction(alert: Omit<Alert, "_id">) {
       });
 
       if (thresholdExceeded) {
-        FlareService.dispatchEmails(
+        LighthouseService.dispatchEmails(
           ["shikev@umich.edu"],
           `Alert with name ${alert.label} triggered!`
         );

@@ -1,15 +1,19 @@
 import express from "express";
-import { Fetcher, getFetchers, updateCronExpression } from "../model/fetchers";
-import { registry } from "../fetchers/registry";
+import {
+  Activity,
+  getActivities,
+  updateCronExpression,
+} from "../model/activities";
+import { registry } from "../activities/registry";
 
 const router = express.Router();
 
-type FetcherResponse = Fetcher[];
+type ActivityResponse = Activity[];
 
-router.get<{}, FetcherResponse>("/", async (req, res) => {
+router.get<{}, ActivityResponse>("/", async (req, res) => {
   try {
-    const fetchers = await getFetchers();
-    return res.json(fetchers);
+    const activities = await getActivities();
+    return res.json(activities);
   } catch (e) {
     console.error(e);
   }

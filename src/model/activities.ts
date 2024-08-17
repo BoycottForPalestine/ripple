@@ -1,17 +1,17 @@
 import { ObjectId } from "mongodb";
 import db from "../config/db";
 
-export type Fetcher = {
+export type Activity = {
   _id: string;
   sourceName: string;
   description: string;
   cronExpression: string;
   functionBody: string;
   link: string;
-  lastFetched?: Date;
+  lastRun?: Date;
 };
 
-async function addFetcherIfNotExists(
+async function addActivityIfNotExists(
   sourceName: string,
   description: string,
   cronExpression: string,
@@ -19,7 +19,7 @@ async function addFetcherIfNotExists(
   link: string
 ): Promise<void> {
   try {
-    const fetcher = {
+    const activity = {
       sourceName,
       description,
       cronExpression,
@@ -31,59 +31,59 @@ async function addFetcherIfNotExists(
       throw new Error("Database connection not established");
     }
 
-    const fetcherExists = await db.mongoDb
-      .collection("fetchers")
+    const activityExists = await db.mongoDb
+      .collection("activities")
       .findOne({ sourceName });
-    if (!fetcherExists) {
-      await db.mongoDb.collection("fetchers").insertOne(fetcher);
+    if (!activityExists) {
+      await db.mongoDb.collection("activities").insertOne(activity);
     } else {
       // Do nothing
     }
   } catch (error) {
-    console.error("Error inserting fetcher:", error);
+    console.error("Error inserting activity:", error);
   }
 }
 
-async function getFetchers(): Promise<Fetcher[] | undefined> {
+async function getActivities(): Promise<Activity[] | undefined> {
   try {
     if (!db.mongoDb) {
       throw new Error("Database connection not established");
     }
 
-    const fetchers = (await db.mongoDb
-      .collection("fetchers")
+    const activities = (await db.mongoDb
+      .collection("activities")
       .find()
-      .toArray()) as unknown as Fetcher[];
-    return fetchers;
+      .toArray()) as unknown as Activity[];
+    return activities;
   } catch (error) {
-    console.error("Error getting fetchers:", error);
+    console.error("Error getting activities:", error);
   }
 }
 
-async function getFetcherBySourceName(sourceName: string) {
+async function getActivityBySourceName(sourceName: string) {
   try {
     if (!db.mongoDb) {
       throw new Error("Database connection not established");
     }
 
-    const fetcher = await db.mongoDb
-      .collection("fetchers")
+    const activity = await db.mongoDb
+      .collection("activities")
       .findOne({ sourceName });
-    return fetcher;
+    return activity;
   } catch (error) {
-    console.error("Error getting fetcher by source name:", error);
+    console.error("Error getting activity by source name:", error);
   }
 }
 
-async function updateLastFetched(sourceName: string) {
+async function updateLastRun(sourceName: string) {
   try {
     if (!db.mongoDb) {
       throw new Error("Database connection not established");
     }
 
     await db.mongoDb
-      .collection("fetchers")
-      .updateOne({ sourceName }, { $set: { lastFetched: new Date() } });
+      .collection("activities")
+      .updateOne({ sourceName }, { $set: { lastRun: new Date() } });
   } catch (error) {
     console.error("Error updating last fetched:", error);
   }
@@ -99,7 +99,7 @@ async function updateCronExpression(
     }
 
     await db.mongoDb
-      .collection("fetchers")
+      .collection("activities")
       .updateOne({ sourceName }, { $set: { cronExpression } });
   } catch (error) {
     console.error("Error updating cron expression:", error);
@@ -107,9 +107,9 @@ async function updateCronExpression(
 }
 
 export {
-  addFetcherIfNotExists,
-  getFetchers,
-  getFetcherBySourceName,
-  updateLastFetched,
+  addActivityIfNotExists,
+  getActivities,
+  getActivityBySourceName,
+  updateLastRun,
   updateCronExpression,
 };

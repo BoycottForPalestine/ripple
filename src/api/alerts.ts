@@ -1,5 +1,5 @@
 import express from "express";
-import { Fetcher, getFetchers } from "../model/fetchers";
+import { Activity, getActivities } from "../model/activities";
 import { Alert, getAlerts } from "../model/alerts";
 import { alertService } from "../lib/alert-service";
 

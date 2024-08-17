@@ -1,35 +1,41 @@
-- Set up API endpoint to get all current cron jobs running
-- Set up API endpoint to edit cron job cadence
-- Create alert data model
+Ripple:
+
+- Quick mock up of front-end (see below for reqs)
+- Setup front-end for everything
+  - Auth screens
+    - Login
+    - Register
+    - Logout
+    - Auth Context
+      - Session manager/multiple tab syncing
+      - Available organizations
+      - Roles
+  - Org context switcher
+  - 
+
+
+
+
+
+- Setup front-end alerts/activities manager (Next.js, Harbor)
+- setup test-beacon
+  - Has an event array
+    - Events have form of {
+      a: (random number 1 through 10),
+      b: (random number 1 through 10),
+      c: (random number 1: through 10),
+    }
+    - New events are added to the array every second
+  - Has endpoint to return event array
+  - Create activity for test-beacon
+  - Create alerts for test-beacon
+- Add endpoint to download entire dataset for a certain sourceName
+- Move alerting out of ripple
 
 -----------
 
-- Condition Match
-- Grouping Match
-
-{
-  _id: "whatever",
-  label: "Terry Stops Alert"
-  alertType: "conditionMatch"
-  thresholdCount: 3,
-  timeWindow: 3600 (in ms),
-  measurementCadence: (in ms),
-  eventSourceName: (link to sourceName),
-  matchConditions: {
-    [customField]: "N",
-  }
-}
-
-{
-  _id: "whatever",
-  label: "Terry Stops Alert"
-  alertType: "groupingMatch"
-  thresholdCount: 3,
-  timeWindow: 3600 (in ms),
-  measurementCadence: (in ms),
-  eventSourceName: (link to sourceName),
-  matchConditions: {
-    [arrest_type]: "N",
-  },
-  groupingMatchField: 'as_on_squad_desc'
-}
+lighthouse (dispatch)
+foghorn (alerts)
+ripple (event scraping)
+harbor (front-end portal/manager)
+test-beacon (for testing purposes)

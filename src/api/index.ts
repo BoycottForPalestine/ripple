@@ -2,8 +2,9 @@ import express from "express";
 
 import MessageResponse from "../interfaces/MessageResponse";
 import emojis from "./emojis";
-import fetchers from "./fetchers";
+import activities from "./activities";
 import alerts from "./alerts";
+import ping from "./ping";
 
 const router = express.Router();
 
@@ -14,7 +15,8 @@ router.get<{}, MessageResponse>("/", (req, res) => {
 });
 
 router.use("/emojis", emojis);
-router.use("/fetchers", fetchers);
+router.use("/activities", activities);
 router.use("/alerts", alerts);
+router.use("/ping", ping);
 
 export default router;

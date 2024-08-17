@@ -1,21 +1,20 @@
 import cron from "node-cron";
 import fs from "fs";
 import path from "path";
-
 import {
-  addFetcherIfNotExists,
-  getFetcherBySourceName,
+  addActivityIfNotExists,
+  getActivityBySourceName,
   updateCronExpression,
-} from "../model/fetchers";
+} from "../model/activities";
 
-type FetcherCronJob = {
-  fetcherFn: () => void;
+type ActivityCronJob = {
+  activityFn: () => void;
   task: cron.ScheduledTask;
 };
 
-export const fetchersToCronRegistry: Record<string, FetcherCronJob> = {};
+export const activitiesToCronRegistry: Record<string, ActivityCronJob> = {};
 
-function initializeFetchers() {
+function initializeActivities() {
   const directoryPath = path.join(__dirname);
   fs.readdirSync(directoryPath).forEach((file) => {
     const absolutePath = path.join(directoryPath, file);
@@ -28,7 +27,7 @@ function initializeFetchers() {
         const description = module.description;
         const link = module.link;
 
-        await addFetcherIfNotExists(
+        await addActivityIfNotExists(
           sourceName,
           description,
           cronExpression,
@@ -36,10 +35,10 @@ function initializeFetchers() {
           link
         );
 
-        const fetcher = await getFetcherBySourceName(sourceName);
-        if (fetcher) {
+        const activity = await getActivityBySourceName(sourceName);
+        if (activity) {
           const task = cron.schedule(
-            fetcher.cronExpression,
+            activity.cronExpression,
             () => {
               module.fetchData();
             },
@@ -47,9 +46,9 @@ function initializeFetchers() {
               runOnInit: true,
             }
           );
-          fetchersToCronRegistry[sourceName] = {
+          activitiesToCronRegistry[sourceName] = {
             task,
-            fetcherFn: module.fetchData,
+            activityFn: module.fetchData,
           };
         }
       });
@@ -58,24 +57,24 @@ function initializeFetchers() {
 }
 
 export const registry = {
-  fetchersToCronRegistry,
-  initializeFetchers,
+  activitiesToCronRegistry,
+  initializeActivities,
   updateCronExpression: function (sourceName: string, cronExpression: string) {
     updateCronExpression(sourceName, cronExpression);
 
-    const fetcher = fetchersToCronRegistry[sourceName];
-    if (!fetcher) {
+    const activity = activitiesToCronRegistry[sourceName];
+    if (!activity) {
       // Do nothing silently if cron task for given sourcename does not exist
       return;
     }
-    fetcher.task.stop();
+    activity.task.stop();
 
     const newTask = cron.schedule(cronExpression, () => {
-      fetcher.fetcherFn();
+      activity.activityFn();
     });
-    fetchersToCronRegistry[sourceName] = {
+    activitiesToCronRegistry[sourceName] = {
       task: newTask,
-      fetcherFn: fetcher.fetcherFn,
+      activityFn: activity.activityFn,
     };
   },
 };

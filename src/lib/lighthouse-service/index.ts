@@ -1,4 +1,4 @@
-const FlareService = {
+const LighthouseService = {
   dispatchSms: (phoneNumbers: string[], message: string) => {
     console.log(`Sending SMS to ${phoneNumbers.join(", ")}`);
   },
@@ -7,4 +7,4 @@ const FlareService = {
   },
 };
 
-export default FlareService;
+export default LighthouseService;
