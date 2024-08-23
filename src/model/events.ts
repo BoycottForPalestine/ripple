@@ -1,5 +1,5 @@
 // @ts-ignore
-import db from "../config/db";
+import { getDb } from "../config/db";
 
 export type RippleEvent = {
   _id: string;
@@ -9,6 +9,8 @@ export type RippleEvent = {
   customFields: object;
 };
 
+const EVENTS_PAGE_SIZE = 100;
+
 export type RippleEventInput = {
   uniqueKey: string;
   sourceName: string;
@@ -16,10 +18,14 @@ export type RippleEventInput = {
   customFields: object;
 };
 
+export type EventSearchOptions = {
+  page?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  filters?: Record<string, string>;
+};
+
 // async function getEventsByFilter(sourceName: string, filter: object) {
-//   if (!db.mongoDb) {
-//     throw new Error("Database connection not established");
-//   }
 
 //   const findFilter: Record<string, string> = {
 //     sourceName,
@@ -29,7 +35,7 @@ export type RippleEventInput = {
 //     findFilter[`customFields.${key}`] = value;
 //   });
 
-//   const events = (await db.mongoDb
+//   const events = (await db
 //     .collection("events")
 //     .find({ findFilter })
 //     .toArray()) as unknown as RippleEvent[];
@@ -42,9 +48,7 @@ async function getEventsByFilterAndTimeWindow(
   customFieldsFilter: object,
   lookbackWindow: number
 ) {
-  if (!db.mongoDb) {
-    throw new Error("Database connection not established");
-  }
+  const db = await getDb();
 
   const findFilter: Record<string, string> = {
     sourceName,
@@ -54,7 +58,7 @@ async function getEventsByFilterAndTimeWindow(
     findFilter[`customFields.${key}`] = value;
   });
 
-  const events = (await db.mongoDb
+  const events = (await db
     .collection("events")
     .find({
       findFilter,
@@ -62,6 +66,56 @@ async function getEventsByFilterAndTimeWindow(
     })
     .toArray()) as unknown as RippleEvent[];
   return events;
+}
+
+async function getEventsBySourceName(
+  organizationId: string,
+  sourceName: string,
+  options: EventSearchOptions
+) {
+  const db = await getDb();
+
+  let sortOption: Record<string, 1 | -1> = {};
+
+  console.log(options);
+
+  if (options.sortBy) {
+    sortOption[`customFields.${options.sortBy}`] =
+      options.sortOrder === "asc" ? 1 : -1;
+  } else {
+    sortOption = { datePulled: -1 };
+  }
+
+  const page = options.page ?? 0;
+
+  const findFilters: Record<string, string> = {
+    sourceName,
+  };
+
+  if (options.filters) {
+    Object.entries(options.filters).forEach(([key, value]) => {
+      findFilters[`customFields.${key}`] = value;
+    });
+  }
+
+  const events = (await db
+    .collection("events")
+    // TODO: Add organizationId to filter
+    .find(findFilters)
+    .sort(sortOption)
+    // Page is 1-indexed so we have to do page - 1
+    .skip(page * EVENTS_PAGE_SIZE)
+    .limit(EVENTS_PAGE_SIZE)
+    .toArray()) as unknown as RippleEvent[];
+
+  const totalEventsCount = await db
+    .collection("events")
+    .countDocuments(findFilters);
+
+  return {
+    events,
+    totalEventsCount,
+  };
 }
 
 async function addEvent(eventToAdd: RippleEventInput): Promise<boolean> {
@@ -77,11 +131,9 @@ async function addEvent(eventToAdd: RippleEventInput): Promise<boolean> {
       customFields: eventToAdd.customFields,
     };
 
-    if (!db.mongoDb) {
-      throw new Error("Database connection not established");
-    }
+    const db = await getDb();
     // @ts-ignore mongodb typing doesn't know _id can be custom
-    await db.mongoDb.collection("events").insertOne(event);
+    await db.collection("events").insertOne(event);
     eventAdded = true;
   } catch (error) {
     // console.error("Error inserting event:", error);
@@ -90,4 +142,4 @@ async function addEvent(eventToAdd: RippleEventInput): Promise<boolean> {
   }
 }
 
-export { getEventsByFilterAndTimeWindow, addEvent };
+export { getEventsByFilterAndTimeWindow, getEventsBySourceName, addEvent };

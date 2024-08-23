@@ -1,4 +1,3 @@
-import db from "../../config/db";
 import { RippleEventInput, addEvent } from "../../model/events";
 
 const eventStack: RippleEventInput[] = [];
@@ -10,11 +9,7 @@ setInterval(async () => {
   const event = eventStack.pop();
 
   if (event) {
-    if (!db.mongoDb) {
-      throw new Error("Database connection not established");
-    }
-
-    console.log("processing:", event);
+    // console.log("processing:", event);
 
     const wasEventAdded = await addEvent(event);
     if (wasEventAdded) {

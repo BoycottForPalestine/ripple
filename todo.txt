@@ -1,36 +1,71 @@
-Ripple:
+Arcs 
+- Lambdas
+  - Pagination, search, sort, and filters
+    - Harbor
+      - add search settings to URL
+      - Fix numeric values not filtering correctly
+  - Add lambdaId to events table (not in custom field, obvio)
+    - Re introduce other lambdas and set cron time to a reasonable one
+- Contacts/Groups
+  - Port over scaffolding from Seaport
+  - Contacts
+  - Groups
+  - Tags
+  - Custom Fields
+- Download
+  - Downloads current returned data
+- Bug/QOL fixes
+  - validation to ripple endpoints
+  - validation to lighthouse endpoints
+
 
 - Quick mock up of front-end (see below for reqs)
+- Ripple fix-ups
+  - fix types
+  - Fix the schema issue
+    - If no events are returned, we don't know how to generate the table columns for filtering
+      - Each lambda should somehow specify it's own schema
+      - Lambda page should be able to fetch schema (let's say at /lambda/[id]/events/schema) and use that to generate even an empty table
+      - Somehow we need to enforce the schema and make sure events all satisfy the schema for a particular source
+        - FOr now as a stop gap we can just get the schema by selecting a random event for the given sourceName
+- Update fonts
 - Setup front-end for everything
+  - Lambdas
+    - Individual lambda view
+      - function body/alerts/events table tabs
+      - Events table
+        - Pagination
+        - Filters
+        - Search
+        - Download 
+
   - Auth screens
-    - Login
     - Register
-    - Logout
     - Auth Context
-      - Session manager/multiple tab syncing
       - Available organizations
       - Roles
-  - Org context switcher
-  - 
+
+- tighter algorithm for fetches (one that doesn't infinite loop)
+- Fix typing issues in Ripple
+- Refactor hooks so initial fetches happen in the hooks and don't need external impetus to call fetch
+
+- outside access to ripple events api
+ - means setting up api keys for seaport
+- Fix out of memory issue
 
 
-
-
-
-- Setup front-end alerts/activities manager (Next.js, Harbor)
-- setup test-beacon
-  - Has an event array
-    - Events have form of {
-      a: (random number 1 through 10),
-      b: (random number 1 through 10),
-      c: (random number 1: through 10),
-    }
-    - New events are added to the array every second
-  - Has endpoint to return event array
-  - Create activity for test-beacon
+- Setup front-end alerts/lambdas manager (Next.js, Harbor)
+  - Create lambda for test-beacon
   - Create alerts for test-beacon
 - Add endpoint to download entire dataset for a certain sourceName
 - Move alerting out of ripple
+
+MVP Punts
+Lambdas/Ripple
+  - Updating cadences thru UI (https://www.npmjs.com/package/cron-time-generator)
+  - ad-hoc run button
+Seaport
+  - Role updating/invites (just manually add users via admin for now)
 
 -----------
 

@@ -26,17 +26,19 @@ async function getConnection() {
   return conn;
 }
 
-let db: {
-  mongoDb: Db | null;
-} = {
-  mongoDb: null,
-};
-getConnection().then((conn) => {
+let db: Db;
+
+const connectionPromise = getConnection().then((conn) => {
   // @ts-ignore
-  db.mongoDb = conn.db(
+  db = conn.db(
     // @ts-ignore
     databaseNames[process.env.DB_ENV] ?? databaseNames["local"]
   );
 });
 
-export default db;
+async function getDb() {
+  await connectionPromise;
+  return db;
+}
+
+export { getDb };

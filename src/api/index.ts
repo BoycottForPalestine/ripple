@@ -1,9 +1,8 @@
 import express from "express";
 
 import MessageResponse from "../interfaces/MessageResponse";
-import emojis from "./emojis";
-import activities from "./activities";
-import alerts from "./alerts";
+import lambda from "./lambda";
+import alert from "./alert";
 import ping from "./ping";
 
 const router = express.Router();
@@ -14,9 +13,8 @@ router.get<{}, MessageResponse>("/", (req, res) => {
   });
 });
 
-router.use("/emojis", emojis);
-router.use("/activities", activities);
-router.use("/alerts", alerts);
-router.use("/ping", ping);
+router.use("/:organization/lambda", lambda);
+router.use("/:organization/alert", alert);
+router.use("/:organization/ping", ping);
 
 export default router;
