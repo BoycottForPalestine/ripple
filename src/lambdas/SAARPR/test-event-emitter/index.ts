@@ -1,9 +1,8 @@
-import { processEvents } from "../../../lib/event-processor-service";
-import { addEvent } from "../../../model/events";
+import { RippleEventInput } from "../../../model/events";
 import axios from "axios";
 
 export const sourceName = "TestEventEmitter";
-export const cronExpression = "*/120 * * * * *"; // This is a default and can be changed in the database
+export const cronExpression = "*/15 * * * * *"; // This is a default and can be changed in the database
 export const description = "Seattle Police Department Use of Force Dataset";
 export const link =
   "https://data.seattle.gov/Public-Safety/Use-Of-Force/ppi5-g2bj";
@@ -24,7 +23,9 @@ function randomIntFromInterval(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-export async function fetchData() {
+export async function lambdaFn(
+  processEventsFn: (events: RippleEventInput[]) => void
+) {
   const generateRandomEvents = () => {
     const events = [];
     for (let i = 0; i < 10; i++) {
@@ -41,5 +42,5 @@ export async function fetchData() {
   };
 
   const eventsToProcess = generateRandomEvents();
-  processEvents(eventsToProcess);
+  processEventsFn(eventsToProcess);
 }

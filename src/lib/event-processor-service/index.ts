@@ -1,6 +1,10 @@
-import { RippleEventInput, addEvent } from "../../model/events";
+import {
+  RippleEventInput,
+  RippleEventInputWithOrg,
+  addEvent,
+} from "../../model/events";
 
-const eventStack: RippleEventInput[] = [];
+const eventStack: RippleEventInputWithOrg[] = [];
 
 // TODO: Eventually move to a pub/sub or topic subscription model
 
@@ -9,24 +13,24 @@ setInterval(async () => {
   const event = eventStack.pop();
 
   if (event) {
-    // console.log("processing:", event);
-
     const wasEventAdded = await addEvent(event);
-    if (wasEventAdded) {
-      // Do alerting?
-      // TODO - This is where alerting would happen.
-      // Flush daily events added to a table, which is processed at the end of the day
-      // And summarized in an email/text alert?
-      // Certain events that are "high profile" can also be alerted on immediately?
-    }
   } else {
     // Do nothing, duplicate event
   }
 }, EVENT_PROCESSING_INTERVAL);
 
-async function processEvents(events: RippleEventInput[]) {
+async function processEvents(
+  organizationId: string,
+  events: RippleEventInput[]
+) {
   // Insert if unique key doesn't have collision
-  eventStack.push(...events);
+  const eventsWithOrgId = events.map((event) => {
+    return {
+      ...event,
+      organizationId: organizationId,
+    };
+  });
+  eventStack.push(...eventsWithOrgId);
 }
 
 export { processEvents };

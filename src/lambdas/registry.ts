@@ -7,9 +7,11 @@ import {
   updateCronExpression,
   updateLastRun,
 } from "../model/lambdas";
+import { RippleEventInput } from "../model/events";
+import { processEvents } from "../lib/event-processor-service";
 
 type LambdaCronJob = {
-  lambdaFn: () => void;
+  lambdaFn: (eventProcessFn: (events: RippleEventInput[]) => void) => void;
   task: cron.ScheduledTask;
 };
 
@@ -37,7 +39,7 @@ function initializelambdas() {
           // Currently, lambdas are organized by directory for each organization
           const organizationId = fileOrDirectory;
           const sourceName = module.sourceName;
-          const fetchData = module.fetchData.toString();
+          const lambdaFn = module.lambdaFn.toString();
           const cronExpression = module.cronExpression;
           const description = module.description;
           const link = module.link;
@@ -47,7 +49,7 @@ function initializelambdas() {
             sourceName,
             description,
             cronExpression,
-            fetchData,
+            lambdaFn,
             link
           );
 
@@ -61,7 +63,9 @@ function initializelambdas() {
             const task = cron.schedule(
               lambda.cronExpression,
               () => {
-                module.fetchData();
+                module.lambdaFn((events: RippleEventInput[]) => {
+                  processEvents(organizationId, events);
+                });
                 updateLastRun(organizationId, sourceName);
               },
               {
@@ -70,7 +74,7 @@ function initializelambdas() {
             );
             lambdasToCronRegistry[organizationId][sourceName] = {
               task,
-              lambdaFn: module.fetchData,
+              lambdaFn: module.lambdaFn,
             };
           }
         });
@@ -103,7 +107,10 @@ export const registry = {
     lambda.task.stop();
 
     const newTask = cron.schedule(cronExpression, () => {
-      lambda.lambdaFn();
+      lambda.lambdaFn((events: RippleEventInput[]) => {
+        processEvents(organizationId, events);
+      });
+      updateLastRun(organizationId, sourceName);
     });
     lambdasToCronRegistry[organizationId][sourceName] = {
       task: newTask,

@@ -18,6 +18,10 @@ export type RippleEventInput = {
   customFields: object;
 };
 
+export type RippleEventInputWithOrg = RippleEventInput & {
+  organizationId: string;
+};
+
 export type EventSearchOptions = {
   page?: number;
   sortBy?: string;
@@ -118,7 +122,7 @@ async function getEventsBySourceName(
   };
 }
 
-async function addEvent(eventToAdd: RippleEventInput): Promise<boolean> {
+async function addEvent(eventToAdd: RippleEventInputWithOrg): Promise<boolean> {
   let eventAdded: boolean = false;
   try {
     const timestamp = new Date();
@@ -128,6 +132,7 @@ async function addEvent(eventToAdd: RippleEventInput): Promise<boolean> {
       sourceName: eventToAdd.sourceName,
       link: eventToAdd.link,
       datePulled: timestamp,
+      organizationId: eventToAdd.organizationId,
       customFields: eventToAdd.customFields,
     };
 
